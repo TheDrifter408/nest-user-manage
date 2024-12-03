@@ -7,13 +7,19 @@ import * as bcrypt from 'bcrypt';
 export class AuthService {
   constructor(private usersService: UsersService) {}
 
-  async signIn(email: string, password: string): Promise<User | string> {
-    const user = await this.usersService.user({ email: email });
-    const UserOrNot = await bcrypt.compare(password, user.password);
-    console.log(UserOrNot);
-    if (UserOrNot) {
-      return user;
+  async signIn(
+    userEmail: string,
+    userPassword: string,
+  ): Promise<User | string> {
+    console.log('Service: ', { userEmail, userPassword });
+    const user = await this.usersService.user({ email: userEmail });
+    //Checking if a user exists with the particular email submitted
+    if (user) {
+      const UserOrNot = await bcrypt.compare(userPassword, user.password);
+      if (UserOrNot) {
+        return user;
+      }
     }
-    return 'ERROR';
+    return 'No User Found';
   }
 }

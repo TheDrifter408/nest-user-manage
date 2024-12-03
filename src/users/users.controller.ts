@@ -4,12 +4,14 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
+import { UserDTO } from 'src/dto/user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -23,13 +25,11 @@ export class UsersController {
     });
   }
   @Get(':id')
-  async getUserById(@Param('id') id: string): Promise<User> {
-    return this.usersService.user({ id: Number(id) });
+  async getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return this.usersService.user({ id: id });
   }
   @Post()
-  async createUser(
-    @Body() userData: { name?: string; email: string; password: string },
-  ): Promise<User | string> {
+  async createUser(@Body() userData: UserDTO): Promise<User | string> {
     if (!userData.password) {
       return 'You must enter a password';
     }
@@ -50,7 +50,7 @@ export class UsersController {
     });
   }
   @Delete(':id')
-  async deleteUser(@Param('id') id: string): Promise<string> {
+  async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<string> {
     const user = await this.getUserById(id);
     if (user) {
       this.usersService.deleteUser({
