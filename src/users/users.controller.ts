@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
 
@@ -19,8 +28,36 @@ export class UsersController {
   }
   @Post()
   async createUser(
-    @Body() userData: { name?: string; email: string },
-  ): Promise<User> {
+    @Body() userData: { name?: string; email: string; password: string },
+  ): Promise<User | string> {
+    if (!userData.password) {
+      return 'You must enter a password';
+    }
     return this.usersService.createUser(userData);
+  }
+  @Put()
+  async updateUser(
+    @Query('email') email: string,
+    @Query('password') password: string,
+  ): Promise<User> {
+    return this.usersService.updateUser({
+      where: {
+        email: email,
+      },
+      data: {
+        password: password,
+      },
+    });
+  }
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string): Promise<string> {
+    const user = await this.getUserById(id);
+    if (user) {
+      this.usersService.deleteUser({
+        id: Number(id),
+      });
+      return `successfully deleted user no.${id}`;
+    }
+    return `There's no user no. ${id}`;
   }
 }
