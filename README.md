@@ -90,3 +90,75 @@ We use the following the command which creates an 'auth' folder containing, a co
 ```bash
 nest g module auth
 ```
+## The 'auth' Folder:
+To properly implement OAuth we have to make use of Nest's reccomended auth framework which is **PassportJS**.
+PassportJS has modules that lets us as the developer to implement the Authentication **Strategies** that we want. For example to implement local authentication that just checks the user's input password we do the following:
+
+```typescript
+import { Strategy } from 'passport-local';
+import { PassportStrategy } from '@nestjs/passport';
+import { Injectable } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { User } from '@prisma/client';
+
+@Injectable()
+export class LocalStrategy extends PassportStrategy(Strategy) {
+  constructor(private authService: AuthService) {
+    super({ usernameField: 'email' });
+  }
+  async validate(email: string, password: string): Promise<User | string> {
+    console.log(email, password);
+    const user = await this.authService.signIn(email, password);
+    if (!user) {
+      return `Unauthorized or doesn't exist`;
+    }
+    return user;
+  }
+}
+```
+Following NestJS's convention of using OOP principles we create a class `LocalStrategy` that extends **PassportJS'** own **Strategy**. We then pass our own custom defined `AuthService` so that this Strategy can make use of it's methods.
+
+The `AuthService` is the following:
+
+```typescript
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
+import { UserDTO } from 'src/dto/user.dto';
+
+@Injectable()
+export class AuthService {
+  constructor(private usersService: UsersService) {}
+
+  async signIn(
+    userEmail: string,
+    userPassword: string,
+  ): Promise<User | string> {
+    const user = await this.usersService.user({ email: userEmail });
+    //Checking if a user exists with the particular email submitted
+    if (user) {
+      const UserOrNot = await bcrypt.compare(userPassword, user.password);
+      if (UserOrNot) {
+        return user;
+      }
+    }
+    return 'No User Found';
+  }
+
+  async register(user: UserDTO): Promise<string> {
+    let newUser = null;
+    try {
+      newUser = await this.usersService.createUser({
+        email: user.email,
+        password: user.password,
+      });
+      return newUser;
+    } catch (e: unknown) {
+      throw new InternalServerErrorException(e);
+    }
+  }
+}
+```
+The `AuthService` inturn needs to make use of the `UsersService` service which is makes use of the `PrismaService` to make read/write operations with the database possible.
+
