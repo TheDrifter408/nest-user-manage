@@ -62,6 +62,14 @@ $ pnpm run test:cov
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
+## Quick Overview Of Folder & File Structure:
+NestJS follows a general OOP style and encourages following [SOLID](https://www.freecodecamp.org/news/solid-principles-explained-in-plain-english/) principles from the very start. Following this we can now begin a short overview of the terminology for NestJS.
+
+### Terminology:
+- _Module_: Generally a file in a folder to organize that wires up our application by importing relevant `Controllers` and `Services`.
+- _Controller_: Controllers are responsible for directing our client based on requests sent. The Controller will dictate which functions to call on the type of request such as **GET**, **POST**, **PUT**,**PATCH** and **DELETE**.
+- _Service_: Used to initialize services such as initialize a database and has methods that perform read/write operations against the database.
+
 ## Implementing Authentication: 
 NestJS is built on top of express thus we can treat it almost as express itself. NestJS provides code organization, a powerful CLI and an opinionated way that encourages SOLID principles. They have a comprehensive guide on to use their CLI to start scaffolding route handlers, using controllers, services and modules.
 
@@ -142,7 +150,18 @@ export class AuthService {
 The `AuthService` inturn needs to make use of the `UsersService` service which is makes use of the `PrismaService` to make read/write operations with the database possible.
 
 >[!NOTE]
->Per NestJS's own reccomendations it is best implement external features or >external apis as <code>Services</code>. For example, since we have to make >frequent calls to our database it is best to implement it as a <code>Service</code>. There is a <code>.service.ts</code> at the root of our source folder that >initializes the connection with our database.
+>Per NestJS's own reccomendations it is best implement external features or external apis as `Services`. For example, since we have to make frequent calls to our database it is best to implement it as a `Service`. There is a `.service.ts` at the root of our source folder that >initializes the connection with our database.
 
 To make sure we are using the `LocalStrategy` we just defined we can make use of NestJS' [guards](https://docs.nestjs.com/guards) feature.
+
+We first create a `guard.ts` in our auth folder where we import `Authguard` from `@nestJS/passport`,
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+
+@Injectable()
+export class LocalAuthGuard extends AuthGuard('local') {}
+
+```
 
