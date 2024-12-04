@@ -141,10 +141,8 @@ export class AuthService {
 ```
 The `AuthService` inturn needs to make use of the `UsersService` service which is makes use of the `PrismaService` to make read/write operations with the database possible.
 
-<div style="background-color: #6c757d; padding: 16px; border-radius: 8px; margin: 10px 0px;">
-<h2>Note</h2>
-<p style="font-size:16px; color:#FFFF;">Per NestJS's own reccomendations it is best implement external features or external apis as <code>Services</code>. For example, since we have to make frequent calls to our database it is best to implement it as a <code>Service</code>. There is a <code>.service.ts</code> at the root of our source folder that initializes the connection with our database.</p>
-</div>
+[!NOTE]
+Per NestJS's own reccomendations it is best implement external features or external apis as <code>Services</code>. For example, since we have to make frequent calls to our database it is best to implement it as a <code>Service</code>. There is a <code>.service.ts</code> at the root of our source folder that initializes the connection with our database.
 
 To make sure we are using the `LocalStrategy` we just defined we can make use of NestJS' [guards](https://docs.nestjs.com/guards) feature.
 
