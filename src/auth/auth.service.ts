@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { UserDTO } from 'src/dto/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +12,6 @@ export class AuthService {
     userEmail: string,
     userPassword: string,
   ): Promise<User | string> {
-    console.log('Service: ', { userEmail, userPassword });
     const user = await this.usersService.user({ email: userEmail });
     //Checking if a user exists with the particular email submitted
     if (user) {
@@ -21,5 +21,18 @@ export class AuthService {
       }
     }
     return 'No User Found';
+  }
+
+  async register(user: UserDTO): Promise<string> {
+    let newUser = null;
+    try {
+      newUser = await this.usersService.createUser({
+        email: user.email,
+        password: user.password,
+      });
+      return newUser;
+    } catch (e: unknown) {
+      throw new InternalServerErrorException(e);
+    }
   }
 }

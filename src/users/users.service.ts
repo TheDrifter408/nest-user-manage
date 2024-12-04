@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { User, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -33,21 +33,32 @@ export class UsersService {
     });
   }
   //Create a user
-  async createUser(data: Prisma.UserCreateInput): Promise<User | string> {
-    const user = await this.user({
-      email: data.email,
-    });
-    if (user !== null) {
-      return 'This user already exists';
+  async createUser(data: Prisma.UserCreateInput): Promise<string> {
+    try {
+      const user = await this.user({
+        email: data.email,
+      });
+      if (user !== null) {
+        return 'This user already exists';
+      }
+    } catch (e: unknown) {
+      throw new InternalServerErrorException('Could not query user', e);
     }
     const hashedPassword = bcrypt.hashSync(data.password, SALTROUNDS);
     data = {
       ...data,
       password: hashedPassword,
     };
-    return this.prisma.user.create({
-      data,
-    });
+    try {
+      const newUser = this.prisma.user.create({
+        data,
+      });
+      if (newUser) {
+        return 'New User Created';
+      }
+    } catch (e: unknown) {
+      throw new InternalServerErrorException('Could not create new user', e);
+    }
   }
 
   //Update a user
