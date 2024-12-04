@@ -62,27 +62,6 @@ $ pnpm run test:cov
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-
 ## Implementing Authentication: 
 NestJS is built on top of express thus we can treat it almost as express itself. NestJS provides code organization, a powerful CLI and an opinionated way that encourages SOLID principles. They have a comprehensive guide on to use their CLI to start scaffolding route handlers, using controllers, services and modules.
 
@@ -161,4 +140,11 @@ export class AuthService {
 }
 ```
 The `AuthService` inturn needs to make use of the `UsersService` service which is makes use of the `PrismaService` to make read/write operations with the database possible.
+
+<div style="background-color: #6c757d; padding: 16px; border-radius: 8px; margin: 10px 0px;">
+<h2>Note</h2>
+<p style="font-size:16px; color:#FFFF;">Per NestJS's own reccomendations it is best implement external features or external apis as <code>Services</code>. For example, since we have to make frequent calls to our database it is best to implement it as a <code>Service</code>. There is a <code>.service.ts</code> at the root of our source folder that initializes the connection with our database.</p>
+</div>
+
+To make sure we are using the `LocalStrategy` we just defined we can make use of NestJS' [guards](https://docs.nestjs.com/guards) feature.
 
