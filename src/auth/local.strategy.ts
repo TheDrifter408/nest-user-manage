@@ -1,6 +1,6 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { User } from '@prisma/client';
 
@@ -10,10 +10,9 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({ usernameField: 'email' });
   }
   async validate(email: string, password: string): Promise<User | string> {
-    console.log(email, password);
-    const user = await this.authService.signIn(email, password);
-    if (!user) {
-      return `Unauthorized or doesn't exist`;
+    const user = await this.authService.validateUser(email, password);
+    if (user === null) {
+      throw new UnauthorizedException();
     }
     return user;
   }
