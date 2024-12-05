@@ -28,6 +28,6 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @Get('google-redirect')
   googleRedirect(@Req() req: Request) {
-    return `Hi, ${req.user['name']}`;
+    return `Hi, ${req.user['name']} from google`;
   }
 }
