@@ -1,18 +1,35 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { User, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
+import { ClientGrpc } from '@nestjs/microservices';
+
 import * as bcrypt from 'bcrypt';
+import {
+  AUTH_PACKAGE_NAME,
+  LOGIN_SERVICE_NAME,
+  LoginServiceClient,
+  UserDto,
+} from 'src/proto/auth';
 const SALTROUNDS = 10;
 @Injectable()
-export class UsersService {
-  constructor(private prisma: PrismaService) {}
-  //Get a user
-  async user(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: userWhereUniqueInput,
-    });
+export class UsersService implements OnModuleInit {
+  private loginService: LoginServiceClient;
+  constructor(
+    @Inject(AUTH_PACKAGE_NAME) private client: ClientGrpc,
+    private prisma: PrismaService,
+  ) {}
+  onModuleInit() {
+    this.loginService =
+      this.client.getService<LoginServiceClient>(LOGIN_SERVICE_NAME);
+  }
+  //login a user
+  loginUser(request: UserDto) {
+    return this.loginService.login(request);
   }
 
   //get all users
@@ -35,8 +52,10 @@ export class UsersService {
   //Create a user
   async createUser(data: Prisma.UserCreateInput): Promise<string> {
     try {
-      const user = await this.user({
-        email: data.email,
+      const user = await this.users({
+        where: {
+          email: data.email,
+        },
       });
       if (user !== null) {
         return 'This user already exists';

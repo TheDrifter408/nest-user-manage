@@ -11,11 +11,15 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
-import { UserDTO } from 'src/dto/user.dto';
+import { UserDto } from 'src/proto/auth';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
+  @Post('login')
+  login(@Body() request: UserDto) {
+    return this.usersService.loginUser(request);
+  }
   @Get()
   async getUsers(@Query('email') email: string): Promise<User[]> {
     return this.usersService.users({
@@ -25,11 +29,15 @@ export class UsersController {
     });
   }
   @Get(':id')
-  async getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return this.usersService.user({ id: id });
+  async getUserById(@Param('id', ParseIntPipe) id: number): Promise<User[]> {
+    return this.usersService.users({
+      where: {
+        id,
+      },
+    });
   }
   @Post()
-  async createUser(@Body() userData: UserDTO): Promise<User | string> {
+  async createUser(@Body() userData: UserDto): Promise<User | string> {
     if (!userData.password) {
       return 'You must enter a password';
     }
