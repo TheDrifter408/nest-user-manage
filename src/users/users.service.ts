@@ -3,11 +3,11 @@ import {
   Injectable,
   InternalServerErrorException,
   OnModuleInit,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { User, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { ClientGrpc } from '@nestjs/microservices';
-
 import * as bcrypt from 'bcrypt';
 import {
   AUTH_PACKAGE_NAME,
@@ -29,7 +29,11 @@ export class UsersService implements OnModuleInit {
   }
   //login a user
   loginUser(request: UserDto) {
-    return this.loginService.login(request);
+    const token = this.loginService.login(request);
+    if (!token) {
+      return new UnauthorizedException();
+    }
+    return token;
   }
 
   //get all users

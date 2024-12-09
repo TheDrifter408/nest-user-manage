@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
@@ -18,7 +19,11 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
   @Post('login')
   login(@Body() request: UserDto) {
-    return this.usersService.loginUser(request);
+    const token = this.usersService.loginUser(request);
+    if (!token) {
+      return new BadRequestException();
+    }
+    return token;
   }
   @Get()
   async getUsers(@Query('email') email: string): Promise<User[]> {
